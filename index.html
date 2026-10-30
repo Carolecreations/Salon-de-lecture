@@ -391,6 +391,9 @@ body{
     <button class="filter-btn" data-cat="Essai">Essai</button>
     <button class="filter-btn" data-cat="Poésie">Poésie</button>
   </div>
+    <button class="btn primary" id="btnRandomBook" style="margin-left:auto; background:linear-gradient(135deg, #8B5A6B, #5D3A4A); border:1px solid #D4AF37; color:var(--creme);">
+    🎲 Lire au hasard
+  </button>
   <div class="toolbar">
     <select class="select-mini" id="sortSelect">
       <option value="date_desc">Date de parution ↓</option>
@@ -980,7 +983,90 @@ function showNotification(msg) {
 }
 
 /* ═══ Initialisation : rendre visible l'onglet actif ═══ */
-document.getElementById("library").classList.add("active");  
+document.getElementById("library").classList.add("active"); 
+/* ═══════════════════════════════════════════════════════════════════
+   LE LIVRE DU JOUR — Tirage au hasard dans la pile "À lire"
+   ═══════════════════════════════════════════════════════════════════ */
+document.getElementById("btnRandomBook").addEventListener("click", () => {
+  /* On filtre les livres qui ne sont pas encore lus */
+  const unreadBooks = books.filter(b => b.status === "À lire" || b.status === "En cours");
+  
+  /* Si la pile "À lire" est vide, on prévient l'utilisateur */
+  if (unreadBooks.length === 0) {
+    alert("Votre pile « À lire » est vide ! Ajoutez de nouveaux livres avec le statut « À lire » pour utiliser cette fonction.");
+    return;
+  }
+
+  /* On tire un livre au hasard */
+  const randomIndex = Math.floor(Math.random() * unreadBooks.length);
+  const randomBook = unreadBooks[randomIndex];
+
+  /* On ouvre sa fiche */
+  window.openDetail(randomBook.id);
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   BONUS : Ajouter un bouton "C'est parti !" dans la fiche du livre
+   ═══════════════════════════════════════════════════════════════════ */
+const originalOpenDetailForRandom = window.openDetail;
+window.openDetail = function(id) {
+  originalOpenDetailForRandom(id);
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+
+  /* On attend que la fiche soit affichée */
+  setTimeout(() => {
+    const detailInfo = document.querySelector("#detailModal .detail-info");
+    if (detailInfo && !detailInfo.querySelector(".start-reading-wrapper")) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "start-reading-wrapper";
+      wrapper.style.cssText = "margin-top:16px; padding-top:16px; border-top:1px solid rgba(212,175,55,.15);";
+      
+      /* Si le livre est déjà "Lu", on ne propose pas de le commencer */
+      if (book.status !== "Lu") {
+        wrapper.innerHTML = `
+          <button class="btn primary" onclick="startReading('${id}')" style="width:100%; padding:12px; font-size:12px;">
+            📖 C'est parti, je commence ce livre !
+          </button>
+        `;
+      } else {
+        wrapper.innerHTML = `<p style="text-align:center; font-size:12px; color:var(--or); font-style:italic;">✓ Déjà lu</p>`;
+      }
+      
+      const linksSection = detailInfo.querySelector(".links-section");
+      if (linksSection) {
+        detailInfo.insertBefore(wrapper, linksSection);
+      } else {
+        detailInfo.appendChild(wrapper);
+      }
+    }
+  }, 60);
+};
+
+/* Fonction pour changer le statut en "En cours" d'un clic */
+window.startReading = function(id) {
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+  
+  book.status = "En cours";
+  saveBooks(); // Sauvegarde et rafraîchit la bibliothèque
+  
+  /* Rafraîchir la fiche pour voir le changement */
+  window.openDetail(id);
+  
+  /* Petite notification visuelle */
+  const notif = document.createElement("div");
+  notif.style.cssText = `
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:linear-gradient(135deg, var(--or), #B4934F); color:#1a0f0a;
+    padding:12px 24px; border-radius:4px; font-size:12px; font-weight:600;
+    letter-spacing:.05em; z-index:9999; animation:slideUp .3s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+  `;
+  notif.textContent = "Bonne lecture ! Statut mis à jour.";
+  document.body.appendChild(notif);
+  setTimeout(() => notif.remove(), 2500);
+};  
 </script>
 <footer style="text-align:center; padding:24px; font-family:'Playfair Display',serif; font-style:italic; font-size:11px; color:rgba(212,175,55,.5); letter-spacing:.1em;">
   Le Salon de lecture — un lieu pour vos livres, rien qu'à vous.
