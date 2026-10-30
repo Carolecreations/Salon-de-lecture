@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le Salon de lecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --prune:#5D3A4A;
+  --prune-clair:#8B5A6B;
+  --or:#D4AF37;
+  --creme:#F5F2E9;
+  --bois:#2A1B14;
+  --texte-dim:rgba(245,242,233,.65);
+  --radius:4px;
+  --shadow:0 12px 40px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background-color: #1a0f0a;
+  /* Image de fond simulée : dégradé bois + prune */
+  background-image: 
+    radial-gradient(ellipse at 50% 100%, rgba(93,58,74,.4) 0%, transparent 60%),
+    linear-gradient(180deg, #2A1B14 0%, #1a0f0a 100%);
+  color:var(--creme);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+/* Barre du haut */
+.topbar{
+  position:sticky; top:0; z-index:100;
+  display:flex; align-items:center; gap:20px;
+  padding:16px 32px;
+  background:rgba(26,15,10,.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(212,175,55,.2);
+}
+.brand{display:flex; align-items:center; gap:12px;}
+.brand-icon{
+  width:36px; height:36px; border-radius:50%;
+  background:linear-gradient(135deg, var(--prune), var(--prune-clair));
+  border:1px solid var(--or);
+}
+.brand h1{font-family:'Playfair Display',serif; font-size:20px; font-weight:600;}
+.brand span{font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:var(--or); display:block;}
+.search-wrap{flex:1; max-width:500px; position:relative;}
+.search-wrap input{
+  width:100%; background:rgba(0,0,0,.4); border:1px solid rgba(212,175,55,.2);
+  color:var(--creme); padding:10px 16px 10px 40px; border-radius:3px;
+  font-size:13px; transition:.3s;
+}
+.search-wrap input:focus{outline:none; border-color:var(--or); background:rgba(0,0,0,.6);}
+.search-wrap svg{position:absolute; left:14px; top:50%; transform:translateY(-50%); opacity:.6;}
+.top-actions{margin-left:auto; display:flex; gap:10px;}
+.btn{
+  padding:9px 16px; border-radius:3px; font-size:11px; font-weight:500;
+  letter-spacing:.08em; text-transform:uppercase; cursor:pointer;
+  border:1px solid rgba(212,175,55,.3); background:transparent; color:var(--creme);
+  transition:.2s; display:inline-flex; align-items:center; gap:8px;
+}
+.btn:hover{border-color:var(--or); color:var(--or); background:rgba(212,175,55,.05);}
+.btn.primary{background:linear-gradient(135deg, var(--or), #B4934F); color:#1a0f0a; border-color:transparent; font-weight:600;}
+.btn.primary:hover{background:linear-gradient(135deg, #E2C893, var(--or));}
+
+/* Filtres & tri */
+.controls{
+  padding:20px 32px 0; display:flex; gap:20px; align-items:center; flex-wrap:wrap;
+}
+.filter-group{display:flex; gap:8px; flex-wrap:wrap;}
+.filter-btn{
+  padding:6px 14px; border-radius:20px; font-size:11px;
+  border:1px solid rgba(245,242,233,.15); background:transparent; color:var(--texte-dim);
+  cursor:pointer; transition:.2s;
+}
+.filter-btn.active{background:var(--prune); border-color:var(--prune); color:var(--creme);}
+.filter-btn:hover:not(.active){border-color:var(--or);}
+.toolbar{margin-left:auto; display:flex; gap:10px;}
+.select-mini{
+  background:rgba(0,0,0,.4); border:1px solid rgba(212,175,55,.2);
+  color:var(--creme); padding:8px 12px; border-radius:3px; font-size:11px;
+  cursor:pointer;
+}
+
+/* Grille de livres */
+.library{
+  padding:24px 32px 80px;
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr));
+  gap:24px;
+}
+.book-card{
+  background:rgba(26,15,10,.7);
+  border:1px solid rgba(212,175,55,.12);
+  border-radius:var(--radius);
+  overflow:hidden; cursor:pointer;
+  transition:.3s;
+  backdrop-filter:blur(4px);
+}
+.book-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(212,175,55,.4);
+  box-shadow:var(--shadow);
+}
+.book-cover{
+  aspect-ratio:2/3; background:rgba(93,58,74,.2);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; position:relative;
+}
+.book-cover img{width:100%; height:100%; object-fit:cover;}
+.book-cover .placeholder{
+  font-family:'Playfair Display',serif; font-size:48px;
+  color:rgba(212,175,55,.3); font-style:italic;
+}
+.book-info{padding:12px 14px 10px;}
+.book-title{
+  font-family:'Playfair Display',serif; font-size:15px; line-height:1.3;
+  margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.book-author{
+  font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--or);
+}
+.book-meta{
+  margin-top:8px; display:flex; gap:8px; font-size:10px; color:var(--texte-dim);
+}
+.book-foot{
+  padding:8px 14px; border-top:1px solid rgba(212,175,55,.08);
+  display:flex; justify-content:space-between; align-items:center;
+  background:rgba(0,0,0,.2);
+}
+.cat-badge{
+  font-size:9px; padding:2px 8px; border-radius:2px;
+  background:rgba(93,58,74,.5); color:var(--creme);
+}
+
+/* Fenêtres modales */
+.overlay{
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(10,5,3,.9); backdrop-filter:blur(8px);
+  display:none; align-items:center; justify-content:center;
+  padding:20px; overflow-y:auto;
+}
+.overlay.open{display:flex;}
+.modal{
+  background:#1a0f0a; border:1px solid rgba(212,175,55,.2);
+  border-radius:6px; width:100%; max-width:900px;
+  max-height:90vh; overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.8);
+}
+.modal-head{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  padding:24px 30px 16px; border-bottom:1px solid rgba(212,175,55,.1);
+  position:sticky; top:0; background:rgba(26,15,10,.95); z-index:5;
+}
+.modal-head h2{font-family:'Playfair Display',serif; font-size:22px;}
+.modal-head .sub{font-size:10px; text-transform:uppercase; letter-spacing:.2em; color:var(--or); margin-top:4px;}
+.close-btn{background:none; border:none; color:var(--texte-dim); font-size:20px; cursor:pointer;}
+.close-btn:hover{color:var(--or);}
+
+/* Fiche détail */
+.detail-body{padding:24px 30px 30px; display:grid; grid-template-columns:200px 1fr; gap:30px;}
+.detail-cover{width:100%; aspect-ratio:2/3; border-radius:4px; overflow:hidden; background:rgba(93,58,74,.2); display:flex; align-items:center; justify-content:center;}
+.detail-cover img{width:100%; height:100%; object-fit:cover;}
+.detail-info h3{font-family:'Playfair Display',serif; font-size:18px; margin-bottom:16px;}
+.info-row{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(245,242,233,.05); font-size:13px;}
+.info-row .label{color:var(--texte-dim); font-size:11px; text-transform:uppercase; letter-spacing:.1em;}
+.links-section{margin-top:24px; padding-top:16px; border-top:1px solid rgba(212,175,55,.15);}
+/* ═══ SECTION AUDIO ═══ */
+.audio-section{
+  margin-top:20px;
+  padding-top:16px;
+  border-top:1px solid rgba(212,175,55,.15);
+}
+.audio-section h4{
+  font-size:11px; text-transform:uppercase; letter-spacing:.15em;
+  color:var(--or); margin-bottom:12px;
+  display:flex; align-items:center; gap:8px;
+}
+.audio-section h4::before{
+  content:'🎧'; font-size:14px;
+}
+.audio-badge{
+  display:inline-block; padding:2px 8px;
+  font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  background:rgba(93,58,74,.5); color:var(--creme);
+  border-radius:2px; margin-left:8px; font-weight:500;
+}
+.audio-badge.free{
+  background:rgba(46,125,50,.4); color:#b8e6ba;
+}
+.audio-badge.paid{
+  background:rgba(166,58,58,.4); color:#f0b8b8;
+}
+.audio-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+  gap:8px;
+}
+.audio-btn{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px;
+  background:rgba(93,58,74,.25);
+  border:1px solid rgba(212,175,55,.2);
+  border-radius:4px;
+  color:var(--creme);
+  text-decoration:none;
+  font-size:12px;
+  transition:.25s;
+  position:relative;
+}
+.audio-btn:hover{
+  background:var(--prune);
+  border-color:var(--or);
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+}
+.audio-btn .ico{
+  font-size:18px; flex-shrink:0; line-height:1;
+}
+.audio-btn .info{
+  display:flex; flex-direction:column; gap:1px; min-width:0;
+}
+.audio-btn .name{
+  font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.audio-btn .sub{
+  font-size:10px; color:var(--texte-dim);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.audio-btn.free .ico{ color:#b8e6ba; }
+.audio-btn.paid .ico{ color:var(--or); }
+.links-section h4{font-size:11px; text-transform:uppercase; letter-spacing:.15em; color:var(--or); margin-bottom:12px;}
+.link-btn{
+  display:inline-block; padding:8px 14px; margin:0 8px 8px 0;
+  background:rgba(93,58,74,.3); border:1px solid rgba(212,175,55,.2);
+  color:var(--creme); text-decoration:none; font-size:11px; border-radius:3px;
+  transition:.2s;
+}
+.link-btn:hover{background:var(--prune); border-color:var(--or);}
+
+/* Formulaire */
+.form-body{padding:24px 30px 30px;}
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.form-grid .full{grid-column:1/-1;}
+.field{display:flex; flex-direction:column; gap:6px;}
+.field label{font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:var(--texte-dim);}
+.field input, .field select, .field textarea{
+  background:rgba(0,0,0,.3); border:1px solid rgba(212,175,55,.15);
+  color:var(--creme); padding:10px; border-radius:3px; font-size:13px;
+}
+.field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--or);}
+.form-actions{display:flex; justify-content:flex-end; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid rgba(212,175,55,.1);}
+
+@media (max-width:700px){
+  .library{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); padding:16px;}
+  .detail-body{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .topbar{padding:12px 16px;}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-icon"></div>
+    <div>
+ <h1>Le Salon de lecture</h1>
+      <span>Catalogue personnel</span>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input id="searchInput" type="text" placeholder="Rechercher un titre, un auteur, un sujet…">
+  </div>
+  <div class="top-actions">
+    <button class="btn" id="btnAdd">+ Ajouter un livre</button>
+    <button class="btn primary" id="btnSave">Sauvegarder</button>
+  </div>
+</header>
+
+<section class="controls">
+  <div class="filter-group" id="categoryFilters">
+    <button class="filter-btn active" data-cat="">Tous</button>
+    <button class="filter-btn" data-cat="Roman">Roman</button>
+    <button class="filter-btn" data-cat="Essai">Essai</button>
+    <button class="filter-btn" data-cat="Poésie">Poésie</button>
+  </div>
+  <div class="toolbar">
+    <select class="select-mini" id="sortSelect">
+      <option value="date_desc">Date de parution ↓</option>
+      <option value="date_asc">Date de parution ↑</option>
+      <option value="author_asc">Auteur A→Z</option>
+      <option value="title_asc">Titre A→Z</option>
+    </select>
+  </div>
+</section>
+
+<main class="library" id="library"></main>
+
+<!-- Overlay : Fiche détail -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal" id="detailModal"></div>
+</div>
+
+<!-- Overlay : Formulaire -->
+<div class="overlay" id="formOverlay">
+  <div class="modal" id="formModal"></div>
+</div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════════════
+   DONNÉES & STOCKAGE
+   ═══════════════════════════════════════════════════════════════════ */
+const STORAGE_KEY = "leSalonDeLecture.books";
+let books = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+let filteredBooks = [...books];
+let currentFilter = "";
+let currentSort = "date_desc";
+
+const CATEGORIES = ["Roman", "Essai", "Poésie", "Biographie", "Théâtre", "Autre"];
+
+function saveBooks() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+  filteredBooks = [...books];
+  applyFiltersAndRender();
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDU
+   ═══════════════════════════════════════════════════════════════════ */
+function renderLibrary() {
+  const lib = document.getElementById("library");
+  if (!filteredBooks.length) {
+    lib.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:80px 20px; color:var(--texte-dim);">
+      <p style="font-family:'Playfair Display',serif; font-size:28px; margin-bottom:12px; font-style:italic; color:var(--or);">Bienvenue au Salon de lecture.</p>
+      <p style="font-size:14px; max-width:440px; margin:0 auto 20px;">Un fauteuil en velours, une lampe chaude, et vos livres préférés. Installez-vous.</p>
+      <p style="font-size:12px; color:var(--texte-dim);">Cliquez sur « + Ajouter un livre » pour commencer votre collection.</p>
+    </div>`;
+    return;
+  }
+  lib.innerHTML = filteredBooks.map(b => `
+    <div class="book-card" data-id="${b.id}">
+      <div class="book-cover">
+        ${b.cover ? `<img src="${b.cover}" alt="">` : `<span class="placeholder">${(b.title || "?")[0]}</span>`}
+      </div>
+      <div class="book-info">
+        <div class="book-title">${b.title || "Sans titre"}</div>
+        <div class="book-author">${b.author || "Auteur inconnu"}</div>
+        <div class="book-meta">
+          ${b.year ? `<span>${b.year}</span>` : ""}
+          ${b.year && b.category ? "·" : ""}
+          ${b.category ? `<span>${b.category}</span>` : ""}
+        </div>
+      </div>
+      <div class="book-foot">
+        <span class="cat-badge">${b.status || "À lire"}</span>
+        ${b.rating ? `<span style="color:var(--or); font-size:11px;">${"★".repeat(b.rating)}</span>` : ""}
+      </div>
+    </div>
+  `).join("");
+
+  document.querySelectorAll(".book-card").forEach(card => {
+    card.addEventListener("click", () => openDetail(card.dataset.id));
+  });
+}
+
+function applyFiltersAndRender() {
+  const query = document.getElementById("searchInput").value.toLowerCase().trim();
+  let result = [...books];
+
+  if (currentFilter) {
+    result = result.filter(b => b.category === currentFilter);
+  }
+  if (query) {
+    result = result.filter(b =>
+      (b.title || "").toLowerCase().includes(query) ||
+      (b.author || "").toLowerCase().includes(query) ||
+      (b.subject || "").toLowerCase().includes(query)
+    );
+  }
+
+  // Tri
+  result.sort((a, b) => {
+    if (currentSort === "date_desc") return (b.year || 0) - (a.year || 0);
+    if (currentSort === "date_asc") return (a.year || 0) - (b.year || 0);
+    if (currentSort === "author_asc") return (a.author || "").localeCompare(b.author || "");
+    if (currentSort === "title_asc") return (a.title || "").localeCompare(b.title || "");
+    return 0;
+  });
+
+  filteredBooks = result;
+  renderLibrary();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FICHE DÉTAIL + LIENS EXTERNES
+   ═══════════════════════════════════════════════════════════════════ */
+function openDetail(id) {
+  const b = books.find(x => x.id === id);
+  if (!b) return;
+  const q = encodeURIComponent((b.title || "") + " " + (b.author || ""));
+  const modal = document.getElementById("detailModal");
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div>
+        <h2>${b.title || "Sans titre"}</h2>
+        <div class="sub">${b.author || "Auteur inconnu"}${b.year ? " · " + b.year : ""}</div>
+      </div>
+      <button class="close-btn" onclick="document.getElementById('detailOverlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-cover">
+        ${b.cover ? `<img src="${b.cover}" alt="">` : `<span class="placeholder" style="font-size:60px;">${(b.title || "?")[0]}</span>`}
+      </div>
+      <div class="detail-info">
+        <div class="info-row"><span class="label">Catégorie</span><span>${b.category || "—"}</span></div>
+        <div class="info-row"><span class="label">Sujet</span><span>${b.subject || "—"}</span></div>
+        <div class="info-row"><span class="label">Éditeur</span><span>${b.publisher || "—"}</span></div>
+        <div class="info-row"><span class="label">Pages</span><span>${b.pages || "—"}</span></div>
+        <div class="info-row"><span class="label">ISBN</span><span>${b.isbn || "—"}</span></div>
+        <div class="info-row"><span class="label">Statut</span><span>${b.status || "À lire"}</span></div>
+        <div class="info-row"><span class="label">Note</span><span style="color:var(--or);">${b.rating ? "★".repeat(b.rating) + "☆".repeat(5 - b.rating) : "—"}</span></div>
+        ${b.notes ? `<div style="margin-top:16px; padding:12px; background:rgba(93,58,74,.2); border-left:2px solid var(--prune-clair); font-style:italic; font-size:13px; color:var(--texte-dim);">${b.notes}</div>` : ""}
+        ${buildAudioSection(b)}
+
+        <div class="links-section">
+          <h4>🔗 Ressources en ligne</h4>
+          <a class="link-btn" href="https://www.babelio.com/resrecherche.php?Recherche=${q}" target="_blank" rel="noopener">📖 Critiques sur Babelio</a>
+          <a class="link-btn" href="https://www.google.com/search?q=${q}+analyse+littéraire" target="_blank" rel="noopener">🎓 Analyses & études</a>
+          <a class="link-btn" href="https://www.abebooks.fr/servlet/SearchResults?kn=${q}" target="_blank" rel="noopener">💰 Estimer la valeur</a>
+          <a class="link-btn" href="https://www.google.com/search?q=${q}+résumé" target="_blank" rel="noopener">📝 Résumé</a>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById("detailOverlay").classList.add("open");
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FORMULAIRE
+   ═══════════════════════════════════════════════════════════════════ */
+function openForm(id) {
+  const b = id ? books.find(x => x.id === id) : null;
+  const modal = document.getElementById("formModal");
+  modal.innerHTML = `
+    <div class="modal-head">
+      <h2>${b ? "Modifier le livre" : "Nouveau livre"}</h2>
+      <button class="close-btn" onclick="document.getElementById('formOverlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="form-body">
+      <form id="bookForm">
+        <div class="form-grid">
+          <div class="field full"><label>Titre *</label><input name="title" value="${b?.title || ""}" required></div>
+          <div class="field full"><label>Auteur *</label><input name="author" value="${b?.author || ""}" required></div>
+          <div class="field"><label>Catégorie</label>
+            <select name="category">${CATEGORIES.map(c => `<option ${b?.category === c ? "selected" : ""}>${c}</option>`).join("")}</select>
+          </div>
+          <div class="field"><label>Année de parution</label><input name="year" type="number" value="${b?.year || ""}" placeholder="1973"></div>
+          <div class="field full"><label>Sujet / Thèmes</label><input name="subject" value="${b?.subject || ""}" placeholder="ex. Amour, guerre, exil…"></div>
+          <div class="field"><label>Éditeur</label><input name="publisher" value="${b?.publisher || ""}"></div>
+          <div class="field"><label>Pages</label><input name="pages" type="number" value="${b?.pages || ""}"></div>
+          <div class="field"><label>ISBN</label><input name="isbn" value="${b?.isbn || ""}"></div>
+          <div class="field"><label>Statut</label>
+            <select name="status">
+              <option ${b?.status === "Lu" ? "selected" : ""}>Lu</option>
+              <option ${b?.status === "À lire" ? "selected" : ""}>À lire</option>
+              <option ${b?.status === "En cours" ? "selected" : ""}>En cours</option>
+              <option ${b?.status === "Prêté" ? "selected" : ""}>Prêté</option>
+            </select>
+          </div>
+          <div class="field"><label>Note (1-5)</label><input name="rating" type="number" min="1" max="5" value="${b?.rating || ""}"></div>
+          <div class="field full"><label>Notes personnelles</label><textarea name="notes" rows="3">${b?.notes || ""}</textarea></div>
+        </div>
+        <div class="form-actions">
+          ${b ? `<button type="button" class="btn" onclick="deleteBook('${b.id}')" style="border-color:#A63A3A; color:#d98c8c;">Supprimer</button>` : ""}
+          <button type="submit" class="btn primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.getElementById("formOverlay").classList.add("open");
+
+  document.getElementById("bookForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    const book = {
+      id: b ? b.id : uid(),
+      title: data.title,
+      author: data.author,
+      category: data.category,
+      year: data.year ? parseInt(data.year) : null,
+      subject: data.subject,
+      publisher: data.publisher,
+      pages: data.pages ? parseInt(data.pages) : null,
+      isbn: data.isbn,
+      status: data.status,
+      rating: data.rating ? parseInt(data.rating) : null,
+      notes: data.notes,
+      cover: b ? b.cover : null
+    };
+    if (b) {
+      const i = books.findIndex(x => x.id === b.id);
+      books[i] = book;
+    } else {
+      books.push(book);
+    }
+    saveBooks();
+    document.getElementById("formOverlay").classList.remove("open");
+  });
+}
+
+function deleteBook(id) {
+  if (!confirm("Supprimer ce livre ?")) return;
+  books = books.filter(x => x.id !== id);
+  saveBooks();
+  document.getElementById("formOverlay").classList.remove("open");
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ÉVÉNEMENTS
+   ═══════════════════════════════════════════════════════════════════ */
+document.getElementById("searchInput").addEventListener("input", applyFiltersAndRender);
+document.getElementById("btnAdd").addEventListener("click", () => openForm(null));
+document.getElementById("btnSave").addEventListener("click", () => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+  alert("Sauvegarde effectuée !");
+});
+document.getElementById("sortSelect").addEventListener("change", e => {
+  currentSort = e.target.value;
+  applyFiltersAndRender();
+});
+document.querySelectorAll("#categoryFilters .filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#categoryFilters .filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentFilter = btn.dataset.cat;
+    applyFiltersAndRender();
+  });
+});
+
+// Fermer les modales en cliquant à l'extérieur
+document.querySelectorAll(".overlay").forEach(ov => {
+  ov.addEventListener("mousedown", e => {
+    if (e.target === ov) ov.classList.remove("open");
+  });
+});
+
+// Initialisation
+applyFiltersAndRender();
+/* ═══════════════════════════════════════════════════════════════════
+   SECTION AUDIO — Détection domaine public + liens intelligents
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Estime si un livre est dans le domaine public (approximation) */
+function isPublicDomain(book){
+  const year = parseInt(book.year, 10);
+  /* Règle générale : publié avant 1929 = domaine public aux USA */
+  if(year && year < 1929) return true;
+  /* Auteurs classiques connus (extension manuelle) */
+  const CLASSIQUES = ["hugo", "zola", "balzac", "flaubert", "stendhal", "proust",
+    "dostoïevski", "dostoievski", "tolstoï", "tolstoi", "tchekhov", "tchékhov",
+    "kafka", "camus", "gide", "maupassant", "baudelaire", "rimbaud", "verlaine",
+    "molière", "moliere", "racine", "corneille", "rousseau", "voltaire",
+    "diderot", "montaigne", "la fontaine", "la bruyère", "la bruyere",
+    "shakespeare", "dickens", "austen", "twain", "poe", "dumas", "sand",
+    "colette", "apollinaire", "cendrars", "péguy", "peguy"];
+  const author = (book.author || "").toLowerCase();
+  return CLASSIQUES.some(c => author.includes(c));
+}
+
+/* Construit la section audio complète */
+function buildAudioSection(book){
+  const q = encodeURIComponent((book.title || "") + " " + (book.author || ""));
+  const title = book.title || "";
+  const author = book.author || "";
+  const publicDomain = isPublicDomain(book);
+
+  /* Sources gratuites (domaine public) */
+  const sourcesGratuites = [
+    { name: "Librivox", sub: "Audio gratuit", ico: "🎧",
+      url: "https://librivox.org/search?q=" + q },
+    { name: "Gallica", sub: "BNF · gratuit", ico: "🏛️",
+      url: "https://gallica.bnf.fr/services/engine/search/sru?operation=searchRetrieve&query=" + q },
+    { name: "AudioLivres.org", sub: "Classiques gratuits", ico: "📻",
+      url: "https://www.google.com/search?q=site:audiolivre.org+" + q },
+    { name: "YouTube", sub: "Recherche libre", ico: "▶️",
+      url: "https://www.youtube.com/results?search_query=" + encodeURIComponent((title || "") + " " + (author || "") + " livre audio") }
+  ];
+
+  /* Sources payantes (contemporain) */
+  const sourcesPayantes = [
+    { name: "Audible", sub: "Amazon · abonnement", ico: "🔊",
+      url: "https://www.audible.fr/search?keywords=" + q },
+    { name: "Audiolib", sub: "Éditeur français", ico: "🎙️",
+      url: "https://www.audiolib.fr/recherche?q=" + q },
+    { name: "Storytel", sub: "Abonnement illimité", ico: "📱",
+      url: "https://www.storytel.com/fr/fr/search?query=" + q },
+    { name: "Deezer", sub: "Livres audio", ico: "🎵",
+      url: "https://www.deezer.com/search/" + q + "/audiobook" }
+  ];
+
+  /* Sélection selon domaine public */
+  const sources = publicDomain
+    ? [...sourcesGratuites, ...sourcesPayantes.slice(0, 2)]
+    : [...sourcesPayantes, sourcesGratuites[3]]; /* YouTube toujours dispo */
+
+  const badge = publicDomain
+    ? `<span class="audio-badge free">Domaine public</span>`
+    : `<span class="audio-badge paid">Protégé</span>`;
+
+  return `
+    <div class="audio-section">
+      <h4>Écouter ce livre ${badge}</h4>
+      <div class="audio-grid">
+        ${sources.map(s => `
+          <a class="audio-btn ${s.name === 'Librivox' || s.name === 'Gallica' || s.name === 'AudioLivres.org' || s.name === 'YouTube' ? 'free' : 'paid'}"
+             href="${s.url}" target="_blank" rel="noopener">
+            <span class="ico">${s.ico}</span>
+            <span class="info">
+              <span class="name">${s.name}</span>
+              <span class="sub">${s.sub}</span>
+            </span>
+          </a>
+        `).join("")}
+      </div>
+      <p style="font-size:10px; color:var(--texte-dim); margin-top:10px; font-style:italic;">
+        ${publicDomain
+          ? "🎉 Ce livre est dans le domaine public — versions audio gratuites disponibles."
+          : "💡 Livre protégé par le droit d'auteur — versions audio payantes ou extraits."}
+      </p>
+    </div>
+  `;
+}
+</script>
+<footer style="text-align:center; padding:24px; font-family:'Playfair Display',serif; font-style:italic; font-size:11px; color:rgba(212,175,55,.5); letter-spacing:.1em;">
+  Le Salon de lecture — un lieu pour vos livres, rien qu'à vous.
+</footer>
+</body>
+</html>
