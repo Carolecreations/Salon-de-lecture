@@ -933,19 +933,35 @@ window.openDetail = function(id) {
   if (!book) return;
   const hasEntry = journal.some(j => j.bookId === id);
   
-  /* Chercher le div des liens et insérer avant */
-  const detailInfo = document.querySelector("#detailModal .detail-info");
-  if (detailInfo && !detailInfo.querySelector(".journal-btn-wrapper")) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "journal-btn-wrapper";
-    wrapper.style.cssText = "margin-top:20px; padding-top:16px; border-top:1px solid rgba(212,175,55,.15);";
-    wrapper.innerHTML = `
-      <button class="btn primary" onclick="openJournalEntry('${id}')" style="width:100%;">
-        ${hasEntry ? "✏️ Modifier l'entrée du journal" : "✍️ Ajouter au journal"}
-      </button>
-    `;
-    detailInfo.insertBefore(wrapper, detailInfo.querySelector(".links-section"));
-  }
+  /* ═══ Bouton "Ajouter au journal" dans la fiche livre ═══ */
+const originalOpenDetail = openDetail;
+window.openDetail = function(id) {
+  originalOpenDetail(id);
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+  const hasEntry = journal.some(j => j.bookId === id);
+  
+  /* Attendre un tout petit peu que la fiche soit construite dans la page */
+  setTimeout(() => {
+    const detailInfo = document.querySelector("#detailModal .detail-info");
+    if (detailInfo && !detailInfo.querySelector(".journal-btn-wrapper")) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "journal-btn-wrapper";
+      wrapper.style.cssText = "margin-top:20px; padding-top:16px; border-top:1px solid rgba(212,175,55,.15);";
+      wrapper.innerHTML = `
+        <button class="btn primary" onclick="openJournalEntry('${id}')" style="width:100%; padding:12px; font-size:12px;">
+          ${hasEntry ? "✏️ Modifier l'entrée du journal" : "✍️ Ajouter au journal"}
+        </button>
+      `;
+      /* On insère le bouton tout en haut de la fiche, juste après les infos de base */
+      const linksSection = detailInfo.querySelector(".links-section");
+      if (linksSection) {
+        detailInfo.insertBefore(wrapper, linksSection);
+      } else {
+        detailInfo.appendChild(wrapper);
+      }
+    }
+  }, 50);
 };
 
 /* Notification discrète */
