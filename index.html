@@ -985,36 +985,16 @@ function showNotification(msg) {
 /* ═══ Initialisation : rendre visible l'onglet actif ═══ */
 document.getElementById("library").classList.add("active"); 
 /* ═══════════════════════════════════════════════════════════════════
-   LE LIVRE DU JOUR — Tirage au hasard dans la pile "À lire"
+   BOUTON "C'EST PARTI" DANS LA FICHE (Version corrigée)
    ═══════════════════════════════════════════════════════════════════ */
-document.getElementById("btnRandomBook").addEventListener("click", () => {
-  /* On filtre les livres qui ne sont pas encore lus */
-  const unreadBooks = books.filter(b => b.status === "À lire" || b.status === "En cours");
-  
-  /* Si la pile "À lire" est vide, on prévient l'utilisateur */
-  if (unreadBooks.length === 0) {
-    alert("Votre pile « À lire » est vide ! Ajoutez de nouveaux livres avec le statut « À lire » pour utiliser cette fonction.");
-    return;
-  }
-
-  /* On tire un livre au hasard */
-  const randomIndex = Math.floor(Math.random() * unreadBooks.length);
-  const randomBook = unreadBooks[randomIndex];
-
-  /* On ouvre sa fiche */
-  window.openDetail(randomBook.id);
-});
-
-/* ═══════════════════════════════════════════════════════════════════
-   BONUS : Ajouter un bouton "C'est parti !" dans la fiche du livre
-   ═══════════════════════════════════════════════════════════════════ */
-const originalOpenDetailForRandom = window.openDetail;
+const originalOpenDetail = window.openDetail;
 window.openDetail = function(id) {
-  originalOpenDetailForRandom(id);
+  originalOpenDetail(id);
+  
   const book = books.find(b => b.id === id);
   if (!book) return;
 
-  /* On attend que la fiche soit affichée */
+  /* On attend un petit instant que le HTML de la fiche soit généré */
   setTimeout(() => {
     const detailInfo = document.querySelector("#detailModal .detail-info");
     if (detailInfo && !detailInfo.querySelector(".start-reading-wrapper")) {
@@ -1022,7 +1002,6 @@ window.openDetail = function(id) {
       wrapper.className = "start-reading-wrapper";
       wrapper.style.cssText = "margin-top:16px; padding-top:16px; border-top:1px solid rgba(212,175,55,.15);";
       
-      /* Si le livre est déjà "Lu", on ne propose pas de le commencer */
       if (book.status !== "Lu") {
         wrapper.innerHTML = `
           <button class="btn primary" onclick="startReading('${id}')" style="width:100%; padding:12px; font-size:12px;">
@@ -1033,6 +1012,7 @@ window.openDetail = function(id) {
         wrapper.innerHTML = `<p style="text-align:center; font-size:12px; color:var(--or); font-style:italic;">✓ Déjà lu</p>`;
       }
       
+      /* On insère le bouton juste avant les liens externes */
       const linksSection = detailInfo.querySelector(".links-section");
       if (linksSection) {
         detailInfo.insertBefore(wrapper, linksSection);
@@ -1040,21 +1020,21 @@ window.openDetail = function(id) {
         detailInfo.appendChild(wrapper);
       }
     }
-  }, 60);
+  }, 50);
 };
 
-/* Fonction pour changer le statut en "En cours" d'un clic */
+/* Fonction pour changer le statut en "En cours" */
 window.startReading = function(id) {
   const book = books.find(b => b.id === id);
   if (!book) return;
   
   book.status = "En cours";
-  saveBooks(); // Sauvegarde et rafraîchit la bibliothèque
+  saveBooks(); // Sauvegarde et rafraîchit
   
   /* Rafraîchir la fiche pour voir le changement */
   window.openDetail(id);
   
-  /* Petite notification visuelle */
+  /* Notification visuelle */
   const notif = document.createElement("div");
   notif.style.cssText = `
     position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
@@ -1066,7 +1046,7 @@ window.startReading = function(id) {
   notif.textContent = "Bonne lecture ! Statut mis à jour.";
   document.body.appendChild(notif);
   setTimeout(() => notif.remove(), 2500);
-};  
+};
 </script>
 <footer style="text-align:center; padding:24px; font-family:'Playfair Display',serif; font-style:italic; font-size:11px; color:rgba(212,175,55,.5); letter-spacing:.1em;">
   Le Salon de lecture — un lieu pour vos livres, rien qu'à vous.
