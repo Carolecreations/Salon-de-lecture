@@ -348,7 +348,11 @@ body{
 .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--or);}
 .form-actions{display:flex; justify-content:flex-end; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid rgba(212,175,55,.1);}
 
-@media (max-width:700px){
+@keyframes slideUp{
+  from{ opacity:0; transform:translate(-50%, 20px); }
+  to{ opacity:1; transform:translate(-50%, 0); }
+}
+  @media (max-width:700px){
   .library{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); padding:16px;}
   .detail-body{grid-template-columns:1fr;}
   .form-grid{grid-template-columns:1fr;}
@@ -397,7 +401,10 @@ body{
   </div>
 </section>
 
-<main class="library" id="library"></main>
+<main class="library active" id="library"></main>
+<div class="journal-view" id="journalView">
+  <div class="journal-timeline" id="journalTimeline"></div>
+</div>
 
 <!-- Overlay : Fiche détail -->
 <div class="overlay" id="detailOverlay">
@@ -739,6 +746,225 @@ function buildAudioSection(book){
     </div>
   `;
 }
+/* ═══════════════════════════════════════════════════════════════════
+   JOURNAL DE LECTURE
+   ═══════════════════════════════════════════════════════════════════ */
+const JOURNAL_KEY = "leSalonDeLecture.journal";
+let journal = JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]");
+
+function saveJournal() {
+  localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
+}
+
+/* Ajouter une entrée au journal depuis un livre */
+function openJournalEntry(bookId) {
+  const book = books.find(b => b.id === bookId);
+  if (!book) return;
+
+  const existing = journal.find(j => j.bookId === bookId);
+  const modal = document.getElementById("detailModal");
+
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div>
+        <h2>${existing ? "Modifier" : "Nouvelle"} lecture</h2>
+        <div class="sub">${book.title || "Sans titre"} · ${book.author || ""}</div>
+      </div>
+      <button class="close-btn" onclick="document.getElementById('detailOverlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="form-body">
+      <form id="journalForm">
+        <div class="form-grid">
+          <div class="field">
+            <label>Date de début</label>
+            <input name="startDate" type="date" value="${existing?.startDate || new Date().toISOString().slice(0,10)}" required>
+          </div>
+          <div class="field">
+            <label>Date de fin</label>
+            <input name="endDate" type="date" value="${existing?.endDate || ""}" placeholder="Laisser vide si en cours">
+          </div>
+          <div class="field">
+            <label>Note (1-5)</label>
+            <input name="rating" type="number" min="1" max="5" value="${existing?.rating || ""}">
+          </div>
+          <div class="field">
+            <label>Citation marquante (optionnel)</label>
+            <textarea name="quote" rows="2" placeholder="« La phrase qui vous a marqué… »">${existing?.quote || ""}</textarea>
+          </div>
+          <div class="field">
+            <label>Page de la citation</label>
+            <input name="quotePage" type="number" value="${existing?.quotePage || ""}" placeholder="ex. 47">
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label>Votre critique / impressions</label>
+            <textarea name="review" rows="4" placeholder="Ce que vous avez ressenti, aimé, détesté…">${existing?.review || ""}</textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          ${existing ? `<button type="button" class="btn" onclick="deleteJournalEntry('${existing.id}')" style="border-color:#A63A3A; color:#d98c8c;">Supprimer du journal</button>` : ""}
+          <button type="submit" class="btn primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.getElementById("detailOverlay").classList.add("open");
+
+  document.getElementById("journalForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    const entry = {
+      id: existing ? existing.id : uid(),
+      bookId: bookId,
+      bookTitle: book.title,
+      bookAuthor: book.author,
+      startDate: data.startDate,
+      endDate: data.endDate || null,
+      rating: data.rating ? parseInt(data.rating) : null,
+      review: data.review || null,
+      quote: data.quote || null,
+      quotePage: data.quotePage ? parseInt(data.quotePage) : null,
+      createdAt: existing ? existing.createdAt : new Date().toISOString()
+    };
+
+    if (existing) {
+      const i = journal.findIndex(j => j.id === existing.id);
+      journal[i] = entry;
+    } else {
+      journal.push(entry);
+    }
+
+    /* Mettre à jour le statut du livre automatiquement */
+    if (entry.endDate) {
+      const b = books.find(b => b.id === bookId);
+      if (b) {
+        b.status = "Lu";
+        if (entry.rating) b.rating = entry.rating;
+        saveBooks();
+      }
+    }
+
+    saveJournal();
+    document.getElementById("detailOverlay").classList.remove("open");
+    renderJournal();
+    showNotification(existing ? "Lecture modifiée" : "Lecture ajoutée au journal");
+  });
+}
+
+function deleteJournalEntry(id) {
+  if (!confirm("Supprimer cette entrée du journal ? Le livre restera dans la bibliothèque.")) return;
+  journal = journal.filter(j => j.id !== id);
+  saveJournal();
+  document.getElementById("detailOverlay").classList.remove("open");
+  renderJournal();
+  showNotification("Entrée supprimée du journal");
+}
+
+function renderJournal() {
+  const timeline = document.getElementById("journalTimeline");
+  if (!journal.length) {
+    timeline.innerHTML = `
+      <div class="journal-empty">
+        <p>Votre journal de lecture est vide.</p>
+        <p style="font-size:13px; max-width:400px; margin:0 auto;">Ouvrez un livre de votre bibliothèque et cliquez sur « ✍️ Ajouter au journal » pour commencer à écrire vos impressions.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const sorted = [...journal].sort((a, b) => (b.endDate || b.startDate).localeCompare(a.endDate || a.startDate));
+
+  timeline.innerHTML = sorted.map(entry => {
+    const rating = entry.rating ? "★".repeat(entry.rating) + "☆".repeat(5 - entry.rating) : "";
+    return `
+      <div class="journal-entry">
+        <div class="journal-entry-header">
+          <div>
+            <div class="journal-entry-title">${entry.bookTitle || "Sans titre"}</div>
+            <div class="journal-entry-author">${entry.bookAuthor || "Auteur inconnu"}</div>
+          </div>
+          <div class="journal-entry-date">
+            ${entry.endDate ? "Terminé le " + new Date(entry.endDate).toLocaleDateString("fr-FR", {day:"numeric", month:"long", year:"numeric"}) : "En cours"}
+          </div>
+        </div>
+        <div class="journal-entry-dates">
+          <span>📖 Commencé le ${new Date(entry.startDate).toLocaleDateString("fr-FR")}</span>
+          ${entry.endDate ? `<span>✓ Terminé le ${new Date(entry.endDate).toLocaleDateString("fr-FR")}</span>` : ""}
+          <span class="journal-entry-rating">${rating}</span>
+        </div>
+        ${entry.review ? `<div class="journal-entry-review">${entry.review}</div>` : ""}
+        ${entry.quote ? `
+          <div class="journal-entry-quote">
+            « ${entry.quote} »
+            ${entry.quotePage ? `<span class="quote-page">— page ${entry.quotePage}</span>` : ""}
+          </div>
+        ` : ""}
+        <div class="journal-entry-actions">
+          <button onclick="openJournalEntry('${entry.bookId}')">✏️ Modifier</button>
+          <button class="delete-btn" onclick="deleteJournalEntry('${entry.id}')">Supprimer</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ═══ Navigation par onglets ═══ */
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const tab = btn.dataset.tab;
+    if (tab === "library") {
+      document.getElementById("library").classList.add("active");
+      document.getElementById("journalView").classList.remove("active");
+    } else {
+      document.getElementById("library").classList.remove("active");
+      document.getElementById("journalView").classList.add("active");
+      renderJournal();
+    }
+  });
+});
+
+/* ═══ Bouton "Ajouter au journal" dans la fiche livre ═══ */
+const originalOpenDetail = openDetail;
+window.openDetail = function(id) {
+  originalOpenDetail(id);
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+  const hasEntry = journal.some(j => j.bookId === id);
+  
+  /* Chercher le div des liens et insérer avant */
+  const detailInfo = document.querySelector("#detailModal .detail-info");
+  if (detailInfo && !detailInfo.querySelector(".journal-btn-wrapper")) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "journal-btn-wrapper";
+    wrapper.style.cssText = "margin-top:20px; padding-top:16px; border-top:1px solid rgba(212,175,55,.15);";
+    wrapper.innerHTML = `
+      <button class="btn primary" onclick="openJournalEntry('${id}')" style="width:100%;">
+        ${hasEntry ? "✏️ Modifier l'entrée du journal" : "✍️ Ajouter au journal"}
+      </button>
+    `;
+    detailInfo.insertBefore(wrapper, detailInfo.querySelector(".links-section"));
+  }
+};
+
+/* Notification discrète */
+function showNotification(msg) {
+  const notif = document.createElement("div");
+  notif.style.cssText = `
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:linear-gradient(135deg, var(--or), #B4934F); color:#1a0f0a;
+    padding:12px 24px; border-radius:4px; font-size:12px; font-weight:600;
+    letter-spacing:.05em; z-index:9999; animation:slideUp .3s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+  `;
+  notif.textContent = msg;
+  document.body.appendChild(notif);
+  setTimeout(() => notif.remove(), 2500);
+}
+
+/* ═══ Initialisation : rendre visible l'onglet actif ═══ */
+document.getElementById("library").classList.add("active");  
 </script>
 <footer style="text-align:center; padding:24px; font-family:'Playfair Display',serif; font-style:italic; font-size:11px; color:rgba(212,175,55,.5); letter-spacing:.1em;">
   Le Salon de lecture — un lieu pour vos livres, rien qu'à vous.
