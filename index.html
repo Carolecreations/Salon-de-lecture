@@ -22,8 +22,8 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  background-color: #1a0f0a;
-  background-image: 
+  background-color:#1a0f0a;
+  background-image:
     radial-gradient(ellipse at 50% 100%, rgba(93,58,74,.4) 0%, transparent 60%),
     linear-gradient(180deg, #2A1B14 0%, #1a0f0a 100%);
   color:var(--creme);
@@ -31,7 +31,8 @@ body{
   min-height:100vh;
   overflow-x:hidden;
 }
-/* Barre du haut */
+
+/* ---------- TOPBAR ---------- */
 .topbar{
   position:sticky; top:0; z-index:100;
   display:flex; align-items:center; gap:20px;
@@ -57,6 +58,8 @@ body{
 .search-wrap input:focus{outline:none; border-color:var(--or); background:rgba(0,0,0,.6);}
 .search-wrap svg{position:absolute; left:14px; top:50%; transform:translateY(-50%); opacity:.6;}
 .top-actions{margin-left:auto; display:flex; gap:10px;}
+
+/* ---------- BOUTONS ---------- */
 .btn{
   padding:9px 16px; border-radius:3px; font-size:11px; font-weight:500;
   letter-spacing:.08em; text-transform:uppercase; cursor:pointer;
@@ -67,10 +70,8 @@ body{
 .btn.primary{background:linear-gradient(135deg, var(--or), #B4934F); color:#1a0f0a; border-color:transparent; font-weight:600;}
 .btn.primary:hover{background:linear-gradient(135deg, #E2C893, var(--or));}
 
-/* Filtres & tri */
-.controls{
-  padding:20px 32px 0; display:flex; gap:20px; align-items:center; flex-wrap:wrap;
-}
+/* ---------- CONTRÔLES ---------- */
+.controls{padding:20px 32px 0; display:flex; gap:20px; align-items:center; flex-wrap:wrap;}
 .filter-group{display:flex; gap:8px; flex-wrap:wrap;}
 .filter-btn{
   padding:6px 14px; border-radius:20px; font-size:11px;
@@ -86,7 +87,7 @@ body{
   cursor:pointer;
 }
 
-/* Onglets */
+/* ---------- ONGLETS ---------- */
 .tabs-bar{
   display:flex; gap:4px; padding:16px 32px 0;
   border-bottom:1px solid rgba(212,175,55,.15);
@@ -97,19 +98,16 @@ body{
   color:var(--texte-dim); background:transparent; border:none;
   border-bottom:2px solid transparent; cursor:pointer; transition:.2s;
 }
-.tab-btn.active{
-  color:var(--or);
-  border-bottom-color:var(--or);
-}
-.tab-btn:hover:not(.active){ color:var(--creme); }
+.tab-btn.active{color:var(--or); border-bottom-color:var(--or);}
+.tab-btn:hover:not(.active){color:var(--creme);}
 
-/* Grille de livres */
+/* ---------- GRILLE ---------- */
 .library{
   padding:24px 32px 80px;
   display:none; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr));
   gap:24px;
 }
-.library.active { display:grid; }
+.library.active{display:grid;}
 .book-card{
   background:rgba(26,15,10,.7);
   border:1px solid rgba(212,175,55,.12);
@@ -138,677 +136,440 @@ body{
   font-family:'Playfair Display',serif; font-size:15px; line-height:1.3;
   margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
-.book-author{
-  font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--or);
-}
-.book-meta{
-  margin-top:8px; display:flex; gap:8px; font-size:10px; color:var(--texte-dim);
-}
+.book-author{font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--or);}
+.book-meta{margin-top:8px; display:flex; gap:8px; font-size:10px; color:var(--texte-dim);}
 .book-foot{
   padding:8px 14px; border-top:1px solid rgba(212,175,55,.08);
   display:flex; justify-content:space-between; align-items:center;
-  background:rgba(0,0,0,.2);
 }
-.cat-badge{
-  font-size:9px; padding:2px 8px; border-radius:2px;
-  background:rgba(93,58,74,.5); color:var(--creme);
-}
+.status{font-size:9px; text-transform:uppercase; letter-spacing:.1em;}
+.status.read{color:#8BC34A;}
+.status.unread{color:var(--texte-dim);}
+.fav{color:var(--or);}
 
-/* Journal de lecture */
-.journal-view{ padding:32px; display:none; }
-.journal-view.active{ display:block; }
-.journal-timeline{ max-width:800px; margin:0 auto; }
-.journal-entry{
-  background:rgba(93,58,74,.15);
-  border-left:3px solid var(--prune-clair);
-  border-radius:0 6px 6px 0;
-  padding:20px 24px;
-  margin-bottom:20px;
-  transition:.2s;
+/* ---------- MODALES ---------- */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.8);
+  backdrop-filter:blur(8px); display:none;
+  align-items:center; justify-content:center; z-index:200; padding:20px;
 }
-.journal-entry:hover{
-  background:rgba(93,58,74,.25);
-  border-left-color:var(--or);
-}
-.journal-entry-header{
-  display:flex; justify-content:space-between; align-items:flex-start;
-  margin-bottom:12px;
-}
-.journal-entry-title{
-  font-family:'Playfair Display',serif;
-  font-size:18px; color:var(--creme); margin-bottom:2px;
-}
-.journal-entry-author{
-  font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--or);
-}
-.journal-entry-date{
-  font-size:11px; color:var(--texte-dim);
-  text-align:right; white-space:nowrap;
-}
-.journal-entry-dates{
-  display:flex; gap:16px; margin-bottom:12px;
-  font-size:11px; color:var(--texte-dim);
-}
-.journal-entry-dates span{ display:flex; align-items:center; gap:6px; }
-.journal-entry-rating{ color:var(--or); font-size:14px; margin-left:auto; }
-.journal-entry-review{
-  font-size:13.5px; color:var(--creme); line-height:1.7;
-  font-style:italic; margin-bottom:12px;
-}
-.journal-entry-quote{
-  background:rgba(0,0,0,.3); padding:12px 16px;
-  border-left:2px solid var(--or); margin:12px 0;
-  font-family:'Playfair Display',serif; font-style:italic;
-  font-size:13px; color:var(--texte-dim); line-height:1.6;
-}
-.journal-entry-quote .quote-page{
-  display:block; margin-top:6px;
-  font-family:'Inter',sans-serif; font-style:normal;
-  font-size:10px; color:var(--or); letter-spacing:.1em;
-}
-.journal-entry-actions{
-  display:flex; gap:10px; margin-top:12px;
-  padding-top:12px; border-top:1px solid rgba(212,175,55,.1);
-}
-.journal-entry-actions button{
-  background:transparent; border:1px solid rgba(212,175,55,.2);
-  color:var(--texte-dim); padding:5px 12px; border-radius:3px;
-  font-size:10px; cursor:pointer; transition:.2s;
-  letter-spacing:.05em; text-transform:uppercase;
-}
-.journal-entry-actions button:hover{
-  border-color:var(--or); color:var(--or);
-}
-.journal-entry-actions .delete-btn:hover{
-  border-color:#A63A3A; color:#d98c8c;
-}
-.journal-empty{
-  text-align:center; padding:80px 20px; color:var(--texte-dim);
-}
-.journal-empty p:first-child{
-  font-family:'Playfair Display',serif;
-  font-size:24px; color:var(--or); margin-bottom:12px;
-  font-style:italic;
-}
-
-/* Fenêtres modales */
-.overlay{
-  position:fixed; inset:0; z-index:1000;
-  background:rgba(10,5,3,.9); backdrop-filter:blur(8px);
-  display:none; align-items:center; justify-content:center;
-  padding:20px; overflow-y:auto;
-}
-.overlay.open{display:flex;}
+.modal-overlay.active{display:flex;}
 .modal{
-  background:#1a0f0a; border:1px solid rgba(212,175,55,.2);
-  border-radius:6px; width:100%; max-width:900px;
-  max-height:90vh; overflow-y:auto;
-  box-shadow:0 20px 60px rgba(0,0,0,.8);
+  background:linear-gradient(180deg,#2A1B14,#1a0f0a);
+  border:1px solid rgba(212,175,55,.3); border-radius:6px;
+  max-width:600px; width:100%; max-height:90vh; overflow-y:auto;
+  padding:32px; box-shadow:var(--shadow);
 }
-.modal-head{
-  display:flex; justify-content:space-between; align-items:flex-start;
-  padding:24px 30px 16px; border-bottom:1px solid rgba(212,175,55,.1);
-  position:sticky; top:0; background:rgba(26,15,10,.95); z-index:5;
+.modal h2{font-family:'Playfair Display',serif; font-size:24px; margin-bottom:20px; color:var(--or);}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--texte-dim); margin-bottom:6px;}
+.form-group input,.form-group textarea,.form-group select{
+  width:100%; background:rgba(0,0,0,.4); border:1px solid rgba(212,175,55,.2);
+  color:var(--creme); padding:10px 14px; border-radius:3px; font-size:13px; font-family:'Inter',sans-serif;
 }
-.modal-head h2{font-family:'Playfair Display',serif; font-size:22px;}
-.modal-head .sub{font-size:10px; text-transform:uppercase; letter-spacing:.2em; color:var(--or); margin-top:4px;}
-.close-btn{background:none; border:none; color:var(--texte-dim); font-size:20px; cursor:pointer;}
-.close-btn:hover{color:var(--or);}
+.form-group input:focus,.form-group textarea:focus{outline:none; border-color:var(--or);}
+.modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:24px;}
 
-/* Fiche détail */
-.detail-body{padding:24px 30px 30px; display:grid; grid-template-columns:200px 1fr; gap:30px;}
-.detail-cover{width:100%; aspect-ratio:2/3; border-radius:4px; overflow:hidden; background:rgba(93,58,74,.2); display:flex; align-items:center; justify-content:center;}
-.detail-cover img{width:100%; height:100%; object-fit:cover;}
-.detail-info h3{font-family:'Playfair Display',serif; font-size:18px; margin-bottom:16px;}
-.info-row{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(245,242,233,.05); font-size:13px;}
-.info-row .label{color:var(--texte-dim); font-size:11px; text-transform:uppercase; letter-spacing:.1em;}
-.links-section{margin-top:24px; padding-top:16px; border-top:1px solid rgba(212,175,55,.15);}
-.links-section h4{font-size:11px; text-transform:uppercase; letter-spacing:.15em; color:var(--or); margin-bottom:12px;}
-.link-btn{
-  display:inline-block; padding:8px 14px; margin:0 8px 8px 0;
-  background:rgba(93,58,74,.3); border:1px solid rgba(212,175,55,.2);
-  color:var(--creme); text-decoration:none; font-size:11px; border-radius:3px;
-  transition:.2s;
-}
-.link-btn:hover{background:var(--prune); border-color:var(--or);}
-
-/* Formulaire */
-.form-body{padding:24px 30px 30px;}
-.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
-.form-grid .full{grid-column:1/-1;}
-.field{display:flex; flex-direction:column; gap:6px;}
-.field label{font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:var(--texte-dim);}
-.field input, .field select, .field textarea{
-  background:rgba(0,0,0,.3); border:1px solid rgba(212,175,55,.15);
-  color:var(--creme); padding:10px; border-radius:3px; font-size:13px;
-}
-.field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--or);}
-.form-actions{display:flex; justify-content:flex-end; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid rgba(212,175,55,.1);}
-
-@keyframes slideUp{
-  from{ opacity:0; transform:translate(-50%, 20px); }
-  to{ opacity:1; transform:translate(-50%, 0); }
+/* ---------- ÉTAT VIDE ---------- */
+.empty-state{
+  grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--texte-dim);
+  font-family:'Playfair Display',serif; font-style:italic; font-size:18px;
 }
 
-@media (max-width:700px){
-  .library{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); padding:16px;}
-  .detail-body{grid-template-columns:1fr;}
-  .form-grid{grid-template-columns:1fr;}
-  .topbar{padding:12px 16px;}
+/* ---------- STATS ---------- */
+.stat-box{
+  grid-column:1/-1; display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:16px;
+}
+.stat-card{
+  background:rgba(26,15,10,.7); border:1px solid rgba(212,175,55,.15);
+  border-radius:var(--radius); padding:24px; text-align:center;
+}
+.stat-card .num{font-family:'Playfair Display',serif; font-size:36px; color:var(--or);}
+.stat-card .lbl{font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--texte-dim); margin-top:6px;}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:768px){
+  .topbar{padding:12px 16px; flex-wrap:wrap;}
+  .search-wrap{order:3; flex-basis:100%; max-width:none;}
+  .controls,.tabs-bar,.library{padding-left:16px; padding-right:16px;}
+  .library{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:16px;}
+  .top-actions{width:100%; justify-content:flex-end;}
 }
 </style>
 </head>
 <body>
 
+<!-- ================= TOPBAR ================= -->
 <header class="topbar">
   <div class="brand">
     <div class="brand-icon"></div>
     <div>
       <h1>Le Salon de lecture</h1>
-      <span>Catalogue personnel</span>
+      <span>Bibliothèque personnelle</span>
     </div>
   </div>
+
   <div class="search-wrap">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input id="searchInput" type="text" placeholder="Rechercher un titre, un auteur, un sujet…">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input type="search" id="searchInput" placeholder="Rechercher un titre, un auteur…">
   </div>
+
   <div class="top-actions">
-    <button class="btn" id="btnAdd">+ Ajouter un livre</button>
+    <button class="btn" id="exportBtn">Exporter</button>
+    <button class="btn" id="importBtn">Importer</button>
+    <button class="btn primary" id="addBtn">+ Ajouter</button>
   </div>
 </header>
 
-<div class="tabs-bar">
-  <button class="tab-btn active" data-tab="library">Ma Bibliothèque</button>
-  <button class="tab-btn" data-tab="journal">Mon Journal</button>
-</div>
-
-<section class="controls">
-  <div class="filter-group" id="categoryFilters">
-    <button class="filter-btn active" data-cat="">Tous</button>
-    <button class="filter-btn" data-cat="Roman">Roman</button>
-    <button class="filter-btn" data-cat="Essai">Essai</button>
-    <button class="filter-btn" data-cat="Poésie">Poésie</button>
+<!-- ================= FILTRES ================= -->
+<div class="controls">
+  <div class="filter-group" id="filterGroup">
+    <button class="filter-btn active" data-filter="all">Tous</button>
+    <button class="filter-btn" data-filter="read">Lus</button>
+    <button class="filter-btn" data-filter="unread">À lire</button>
+    <button class="filter-btn" data-filter="favorite">Favoris</button>
   </div>
   <div class="toolbar">
     <select class="select-mini" id="sortSelect">
-      <option value="date_desc">Date de parution ↓</option>
-      <option value="date_asc">Date de parution ↑</option>
-      <option value="author_asc">Auteur A→Z</option>
-      <option value="title_asc">Titre A→Z</option>
+      <option value="recent">Ajout récent</option>
+      <option value="title">Titre A→Z</option>
+      <option value="author">Auteur A→Z</option>
+      <option value="rating">Note</option>
     </select>
   </div>
-</section>
-
-<main class="library active" id="library"></main>
-<div class="journal-view" id="journalView">
-  <div class="journal-timeline" id="journalTimeline"></div>
 </div>
 
-<!-- Overlay : Fiche détail -->
-<div class="overlay" id="detailOverlay">
-  <div class="modal" id="detailModal"></div>
+<!-- ================= ONGLETS ================= -->
+<nav class="tabs-bar">
+  <button class="tab-btn active" data-tab="library">Bibliothèque</button>
+  <button class="tab-btn" data-tab="wishlist">À acheter</button>
+  <button class="tab-btn" data-tab="loans">Prêts</button>
+  <button class="tab-btn" data-tab="stats">Statistiques</button>
+</nav>
+
+<!-- ================= GRILLES ================= -->
+<main class="library active" id="libraryGrid"></main>
+<main class="library" id="wishlistGrid"></main>
+<main class="library" id="loansGrid"></main>
+<main class="library" id="statsGrid"></main>
+
+<!-- ================= MODALE DÉTAIL ================= -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <h2 id="detailTitle">—</h2>
+    <div id="detailBody"></div>
+    <div class="modal-actions">
+      <button class="btn" data-close>Fermer</button>
+      <button class="btn" id="deleteBtn">Supprimer</button>
+      <button class="btn primary" id="editBtn">Modifier</button>
+    </div>
+  </div>
 </div>
 
-<!-- Overlay : Formulaire -->
-<div class="overlay" id="formOverlay">
-  <div class="modal" id="formModal"></div>
+<!-- ================= MODALE FORMULAIRE ================= -->
+<div class="modal-overlay" id="formModal">
+  <div class="modal">
+    <h2 id="formTitle">Ajouter un livre</h2>
+    <form id="bookForm">
+      <div class="form-group"><label>Titre</label><input name="title" required></div>
+      <div class="form-group"><label>Auteur</label><input name="author" required></div>
+      <div class="form-group"><label>Année</label><input name="year" type="number" min="0" max="2100"></div>
+      <div class="form-group"><label>Genre</label><input name="genre"></div>
+      <div class="form-group"><label>Note (1-5)</label><input name="rating" type="number" min="1" max="5"></div>
+      <div class="form-group"><label>Couverture (URL)</label><input name="cover" type="url"></div>
+      <div class="form-group"><label>Notes</label><textarea name="notes" rows="3"></textarea></div>
+      <div class="form-group"><label>Statut</label>
+        <select name="read">
+          <option value="false">À lire</option>
+          <option value="true">Lu</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Favori</label>
+        <select name="favorite">
+          <option value="false">Non</option>
+          <option value="true">Oui</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" data-close>Annuler</button>
+        <button type="submit" class="btn primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
 </div>
-
 <script>
-"use strict";
+/* =========================================================
+   ÉTAT & PERSISTANCE
+   ========================================================= */
+const STORAGE_KEY = 'salon-lecture-books';
+let books = [];
+try { books = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e){ books = []; }
 
-const STORAGE_KEY = "leSalonDeLecture.books";
-let books = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-let filteredBooks = [...books];
-let currentFilter = "";
-let currentSort = "date_desc";
+let currentFilter = 'all';
+let currentSort   = 'recent';
+let currentTab    = 'library';
+let editingId     = null;
 
-const CATEGORIES = ["Roman", "Essai", "Poésie", "Biographie", "Théâtre", "Autre"];
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(books)); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
-function saveBooks() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
-  filteredBooks = [...books];
-  applyFiltersAndRender();
+/* =========================================================
+   FILTRAGE & TRI
+   ========================================================= */
+function getFilteredBooks(){
+  let list = [...books];
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+
+  if(q) list = list.filter(b =>
+    (b.title||'').toLowerCase().includes(q) ||
+    (b.author||'').toLowerCase().includes(q)
+  );
+
+  if(currentFilter === 'read')     list = list.filter(b => b.read);
+  if(currentFilter === 'unread')   list = list.filter(b => !b.read);
+  if(currentFilter === 'favorite') list = list.filter(b => b.favorite);
+
+  const sorters = {
+    recent: (a,b) => (b.addedAt||0) - (a.addedAt||0),
+    title:  (a,b) => (a.title||'').localeCompare(b.title||''),
+    author: (a,b) => (a.author||'').localeCompare(b.author||''),
+    rating: (a,b) => (b.rating||0) - (a.rating||0),
+  };
+  return list.sort(sorters[currentSort] || sorters.recent);
 }
 
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-}
-
-function renderLibrary() {
-  const lib = document.getElementById("library");
-  if (!filteredBooks.length) {
-    lib.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:80px 20px; color:var(--texte-dim);">
-      <p style="font-family:'Playfair Display',serif; font-size:24px; margin-bottom:12px;">Votre bibliothèque est vide.</p>
-      <p>Cliquez sur « + Ajouter un livre » pour commencer.</p>
+/* =========================================================
+   RENDU DES CARTES
+   ========================================================= */
+function renderCard(book){
+  const card = document.createElement('div');
+  card.className = 'book-card';
+  card.dataset.id = book.id;
+  const firstLetter = (book.title||'?').charAt(0).toUpperCase();
+  card.innerHTML = `
+    <div class="book-cover">
+      ${book.cover
+        ? `<img src="${book.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'placeholder',textContent:'${firstLetter}'}))">`
+        : `<span class="placeholder">${firstLetter}</span>`}
+    </div>
+    <div class="book-info">
+      <div class="book-title">${book.title||'Sans titre'}</div>
+      <div class="book-author">${book.author||'Auteur inconnu'}</div>
+      <div class="book-meta">
+        <span>${book.year||'—'}</span>
+        ${book.rating ? `<span>★ ${book.rating}</span>` : ''}
+      </div>
+    </div>
+    <div class="book-foot">
+      <span class="status ${book.read ? 'read':'unread'}">${book.read ? 'Lu':'À lire'}</span>
+      <span class="fav">${book.favorite ? '♥' : ''}</span>
     </div>`;
-    return;
-  }
-  lib.innerHTML = filteredBooks.map(b => `
-    <div class="book-card" data-id="${b.id}">
-      <div class="book-cover">
-        ${b.cover ? `<img src="${b.cover}" alt="">` : `<span class="placeholder">${(b.title || "?")[0]}</span>`}
-      </div>
-      <div class="book-info">
-        <div class="book-title">${b.title || "Sans titre"}</div>
-        <div class="book-author">${b.author || "Auteur inconnu"}</div>
-        <div class="book-meta">
-          ${b.year ? `<span>${b.year}</span>` : ""}
-          ${b.year && b.category ? "·" : ""}
-          ${b.category ? `<span>${b.category}</span>` : ""}
-        </div>
-      </div>
-      <div class="book-foot">
-        <span class="cat-badge">${b.status || "À lire"}</span>
-        ${b.rating ? `<span style="color:var(--or); font-size:11px;">${"★".repeat(b.rating)}</span>` : ""}
-      </div>
-    </div>
-  `).join("");
-
-  document.querySelectorAll(".book-card").forEach(card => {
-    card.addEventListener("click", () => openDetail(card.dataset.id));
-  });
+  card.addEventListener('click', () => openDetail(book.id));
+  return card;
 }
 
-function applyFiltersAndRender() {
-  const query = document.getElementById("searchInput").value.toLowerCase().trim();
-  let result = [...books];
-
-  if (currentFilter) result = result.filter(b => b.category === currentFilter);
-  if (query) {
-    result = result.filter(b =>
-      (b.title || "").toLowerCase().includes(query) ||
-      (b.author || "").toLowerCase().includes(query) ||
-      (b.subject || "").toLowerCase().includes(query)
-    );
-  }
-
-  result.sort((a, b) => {
-    if (currentSort === "date_desc") return (b.year || 0) - (a.year || 0);
-    if (currentSort === "date_asc") return (a.year || 0) - (b.year || 0);
-    if (currentSort === "author_asc") return (a.author || "").localeCompare(b.author || "");
-    if (currentSort === "title_asc") return (a.title || "").localeCompare(b.title || "");
-    return 0;
-  });
-
-  filteredBooks = result;
-  renderLibrary();
+function renderStats(){
+  const grid = document.getElementById('statsGrid');
+  grid.innerHTML = '';
+  const total    = books.length;
+  const read     = books.filter(b => b.read).length;
+  const unread   = total - read;
+  const favs     = books.filter(b => b.favorite).length;
+  const avg      = books.filter(b=>b.rating).reduce((s,b)=>s+b.rating,0) / (books.filter(b=>b.rating).length||1);
+  const box = document.createElement('div');
+  box.className = 'stat-box';
+  box.innerHTML = `
+    <div class="stat-card"><div class="num">${total}</div><div class="lbl">Livres</div></div>
+    <div class="stat-card"><div class="num">${read}</div><div class="lbl">Lus</div></div>
+    <div class="stat-card"><div class="num">${unread}</div><div class="lbl">À lire</div></div>
+    <div class="stat-card"><div class="num">${favs}</div><div class="lbl">Favoris</div></div>
+    <div class="stat-card"><div class="num">${avg.toFixed(1)}</div><div class="lbl">Note moyenne</div></div>`;
+  grid.appendChild(box);
 }
 
-function openDetail(id) {
-  const b = books.find(x => x.id === id);
-  if (!b) return;
-  const q = encodeURIComponent((b.title || "") + " " + (b.author || ""));
-  const modal = document.getElementById("detailModal");
-  modal.innerHTML = `
-    <div class="modal-head">
-      <div>
-        <h2>${b.title || "Sans titre"}</h2>
-        <div class="sub">${b.author || "Auteur inconnu"}${b.year ? " · " + b.year : ""}</div>
-      </div>
-      <button class="close-btn" onclick="document.getElementById('detailOverlay').classList.remove('open')">✕</button>
-    </div>
-    <div class="detail-body">
-      <div class="detail-cover">
-        ${b.cover ? `<img src="${b.cover}" alt="">` : `<span class="placeholder" style="font-size:60px;">${(b.title || "?")[0]}</span>`}
-      </div>
-      <div class="detail-info">
-        <div class="info-row"><span class="label">Catégorie</span><span>${b.category || "—"}</span></div>
-        <div class="info-row"><span class="label">Sujet</span><span>${b.subject || "—"}</span></div>
-        <div class="info-row"><span class="label">Éditeur</span><span>${b.publisher || "—"}</span></div>
-        <div class="info-row"><span class="label">Pages</span><span>${b.pages || "—"}</span></div>
-        <div class="info-row"><span class="label">ISBN</span><span>${b.isbn || "—"}</span></div>
-        <div class="info-row"><span class="label">Statut</span><span>${b.status || "À lire"}</span></div>
-        <div class="info-row"><span class="label">Note</span><span style="color:var(--or);">${b.rating ? "★".repeat(b.rating) + "☆".repeat(5 - b.rating) : "—"}</span></div>
-        ${b.notes ? `<div style="margin-top:16px; padding:12px; background:rgba(93,58,74,.2); border-left:2px solid var(--prune-clair); font-style:italic; font-size:13px; color:var(--texte-dim);">${b.notes}</div>` : ""}
+function render(){
+  document.querySelectorAll('.library').forEach(g => g.classList.remove('active'));
 
-        <div class="links-section">
-          <h4>🔗 Ressources en ligne</h4>
-          <a class="link-btn" href="https://www.babelio.com/resrecherche.php?Recherche=${q}" target="_blank" rel="noopener">📖 Critiques sur Babelio</a>
-          <a class="link-btn" href="https://www.google.com/search?q=${q}+analyse+littéraire" target="_blank" rel="noopener">🎓 Analyses & études</a>
-          <a class="link-btn" href="https://www.abebooks.fr/servlet/SearchResults?kn=${q}" target="_blank" rel="noopener">💰 Estimer la valeur</a>
-          <a class="link-btn" href="https://www.google.com/search?q=${q}+résumé" target="_blank" rel="noopener">📝 Résumé</a>
-        </div>
-      </div>
-    </div>
-  `;
-  document.getElementById("detailOverlay").classList.add("open");
-}
-
-function openForm(id) {
-  const b = id ? books.find(x => x.id === id) : null;
-  const modal = document.getElementById("formModal");
-  modal.innerHTML = `
-    <div class="modal-head">
-      <h2>${b ? "Modifier le livre" : "Nouveau livre"}</h2>
-      <button class="close-btn" onclick="document.getElementById('formOverlay').classList.remove('open')">✕</button>
-    </div>
-    <div class="form-body">
-      <form id="bookForm">
-        <div class="form-grid">
-          <div class="field full"><label>Titre *</label><input name="title" value="${b?.title || ""}" required></div>
-          <div class="field full"><label>Auteur *</label><input name="author" value="${b?.author || ""}" required></div>
-          <div class="field"><label>Catégorie</label>
-            <select name="category">${CATEGORIES.map(c => `<option ${b?.category === c ? "selected" : ""}>${c}</option>`).join("")}</select>
-          </div>
-          <div class="field"><label>Année de parution</label><input name="year" type="number" value="${b?.year || ""}" placeholder="1973"></div>
-          <div class="field full"><label>Sujet / Thèmes</label><input name="subject" value="${b?.subject || ""}" placeholder="ex. Amour, guerre, exil…"></div>
-          <div class="field"><label>Éditeur</label><input name="publisher" value="${b?.publisher || ""}"></div>
-          <div class="field"><label>Pages</label><input name="pages" type="number" value="${b?.pages || ""}"></div>
-          <div class="field"><label>ISBN</label><input name="isbn" value="${b?.isbn || ""}"></div>
-          <div class="field"><label>Statut</label>
-            <select name="status">
-              <option ${b?.status === "Lu" ? "selected" : ""}>Lu</option>
-              <option ${b?.status === "À lire" ? "selected" : ""}>À lire</option>
-              <option ${b?.status === "En cours" ? "selected" : ""}>En cours</option>
-              <option ${b?.status === "Prêté" ? "selected" : ""}>Prêté</option>
-            </select>
-          </div>
-          <div class="field"><label>Note (1-5)</label><input name="rating" type="number" min="1" max="5" value="${b?.rating || ""}"></div>
-          <div class="field full"><label>Notes personnelles</label><textarea name="notes" rows="3">${b?.notes || ""}</textarea></div>
-        </div>
-        <div class="form-actions">
-          ${b ? `<button type="button" class="btn" onclick="deleteBook('${b.id}')" style="border-color:#A63A3A; color:#d98c8c;">Supprimer</button>` : ""}
-          <button type="submit" class="btn primary">Enregistrer</button>
-        </div>
-      </form>
-    </div>
-  `;
-  document.getElementById("formOverlay").classList.add("open");
-
-  document.getElementById("bookForm").addEventListener("submit", e => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target));
-    const book = {
-      id: b ? b.id : uid(),
-      title: data.title,
-      author: data.author,
-      category: data.category,
-      year: data.year ? parseInt(data.year) : null,
-      subject: data.subject,
-      publisher: data.publisher,
-      pages: data.pages ? parseInt(data.pages) : null,
-      isbn: data.isbn,
-      status: data.status,
-      rating: data.rating ? parseInt(data.rating) : null,
-      notes: data.notes,
-      cover: b ? b.cover : null
-    };
-    if (b) {
-      const i = books.findIndex(x => x.id === b.id);
-      books[i] = book;
-    } else {
-      books.push(book);
-    }
-    saveBooks();
-    document.getElementById("formOverlay").classList.remove("open");
-  });
-}
-
-function deleteBook(id) {
-  if (!confirm("Supprimer ce livre ?")) return;
-  books = books.filter(x => x.id !== id);
-  saveBooks();
-  document.getElementById("formOverlay").classList.remove("open");
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   JOURNAL DE LECTURE
-   ═══════════════════════════════════════════════════════════════════ */
-const JOURNAL_KEY = "leSalonDeLecture.journal";
-let journal = JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]");
-
-function saveJournal() {
-  localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
-}
-
-function openJournalEntry(bookId) {
-  const book = books.find(b => b.id === bookId);
-  if (!book) return;
-
-  const existing = journal.find(j => j.bookId === bookId);
-  const modal = document.getElementById("detailModal");
-
-  modal.innerHTML = `
-    <div class="modal-head">
-      <div>
-        <h2>${existing ? "Modifier" : "Nouvelle"} lecture</h2>
-        <div class="sub">${book.title || "Sans titre"} · ${book.author || ""}</div>
-      </div>
-      <button class="close-btn" onclick="document.getElementById('detailOverlay').classList.remove('open')">✕</button>
-    </div>
-    <div class="form-body">
-      <form id="journalForm">
-        <div class="form-grid">
-          <div class="field">
-            <label>Date de début</label>
-            <input name="startDate" type="date" value="${existing?.startDate || new Date().toISOString().slice(0,10)}" required>
-          </div>
-          <div class="field">
-            <label>Date de fin</label>
-            <input name="endDate" type="date" value="${existing?.endDate || ""}" placeholder="Laisser vide si en cours">
-          </div>
-          <div class="field">
-            <label>Note (1-5)</label>
-            <input name="rating" type="number" min="1" max="5" value="${existing?.rating || ""}">
-          </div>
-          <div class="field">
-            <label>Citation marquante (optionnel)</label>
-            <textarea name="quote" rows="2" placeholder="« La phrase qui vous a marqué… »">${existing?.quote || ""}</textarea>
-          </div>
-          <div class="field">
-            <label>Page de la citation</label>
-            <input name="quotePage" type="number" value="${existing?.quotePage || ""}" placeholder="ex. 47">
-          </div>
-          <div class="field" style="grid-column:1/-1;">
-            <label>Votre critique / impressions</label>
-            <textarea name="review" rows="4" placeholder="Ce que vous avez ressenti, aimé, détesté…">${existing?.review || ""}</textarea>
-          </div>
-        </div>
-        <div class="form-actions">
-          ${existing ? `<button type="button" class="btn" onclick="deleteJournalEntry('${existing.id}')" style="border-color:#A63A3A; color:#d98c8c;">Supprimer du journal</button>` : ""}
-          <button type="submit" class="btn primary">Enregistrer</button>
-        </div>
-      </form>
-    </div>
-  `;
-
-  document.getElementById("detailOverlay").classList.add("open");
-
-  document.getElementById("journalForm").addEventListener("submit", e => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target));
-    const entry = {
-      id: existing ? existing.id : uid(),
-      bookId: bookId,
-      bookTitle: book.title,
-      bookAuthor: book.author,
-      startDate: data.startDate,
-      endDate: data.endDate || null,
-      rating: data.rating ? parseInt(data.rating) : null,
-      review: data.review || null,
-      quote: data.quote || null,
-      quotePage: data.quotePage ? parseInt(data.quotePage) : null,
-      createdAt: existing ? existing.createdAt : new Date().toISOString()
-    };
-
-    if (existing) {
-      const i = journal.findIndex(j => j.id === existing.id);
-      journal[i] = entry;
-    } else {
-      journal.push(entry);
-    }
-    saveJournal();
-    renderJournal();
-    document.getElementById("detailOverlay").classList.remove("open");
-  });
-}
-
-function deleteJournalEntry(id) {
-  if (!confirm("Supprimer cette entrée du journal ?")) return;
-  journal = journal.filter(j => j.id !== id);
-  saveJournal();
-  renderJournal();
-  document.getElementById("detailOverlay").classList.remove("open");
-}
-
-function renderJournal() {
-  const timeline = document.getElementById("journalTimeline");
-  const sorted = [...journal].sort((a, b) => {
-    const da = a.startDate || "";
-    const db = b.startDate || "";
-    return db.localeCompare(da);
-  });
-
-  if (!sorted.length) {
-    timeline.innerHTML = `
-      <div class="journal-empty">
-        <p>Votre journal est vide.</p>
-        <p>Ouvrez un livre de votre bibliothèque et ajoutez une entrée pour consigner vos lectures, vos impressions et vos citations préférées.</p>
-      </div>
-    `;
+  if(currentTab === 'stats'){
+    document.getElementById('statsGrid').classList.add('active');
+    renderStats();
     return;
   }
 
-  timeline.innerHTML = sorted.map(entry => {
-    const book = books.find(b => b.id === entry.bookId);
-    const dateLabel = entry.startDate
-      ? new Date(entry.startDate).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-      : "Date inconnue";
-    const endLabel = entry.endDate
-      ? new Date(entry.endDate).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-      : null;
+  const gridId = currentTab === 'library' ? 'libraryGrid'
+               : currentTab === 'wishlist' ? 'wishlistGrid'
+               : 'loansGrid';
+  const grid = document.getElementById(gridId);
+  grid.classList.add('active');
+  grid.innerHTML = '';
 
-    return `
-      <article class="journal-entry" data-id="${entry.id}">
-        <div class="journal-entry-header">
-          <div>
-            <div class="journal-entry-title">${entry.bookTitle || "Sans titre"}</div>
-            <div class="journal-entry-author">${entry.bookAuthor || "Auteur inconnu"}</div>
-          </div>
-          <div class="journal-entry-date">${dateLabel}</div>
-        </div>
-
-        <div class="journal-entry-dates">
-          <span>📖 Début : ${dateLabel}</span>
-          ${endLabel ? `<span>✅ Fin : ${endLabel}</span>` : `<span>⏳ En cours</span>`}
-          ${entry.rating ? `<span class="journal-entry-rating">${"★".repeat(entry.rating)}${"☆".repeat(5 - entry.rating)}</span>` : ""}
-        </div>
-
-        ${entry.review ? `<div class="journal-entry-review">« ${entry.review} »</div>` : ""}
-
-        ${entry.quote ? `
-          <blockquote class="journal-entry-quote">
-            « ${entry.quote} »
-            ${entry.quotePage ? `<span class="quote-page">— page ${entry.quotePage}</span>` : ""}
-          </blockquote>
-        ` : ""}
-
-        <div class="journal-entry-actions">
-          ${book ? `<button class="edit-btn" data-book="${book.id}">✎ Modifier</button>` : ""}
-          <button class="delete-btn" data-entry="${entry.id}">✕ Supprimer</button>
-        </div>
-      </article>
-    `;
-  }).join("");
-
-  // Attach listeners
-  timeline.querySelectorAll(".edit-btn").forEach(btn => {
-    btn.addEventListener("click", () => openJournalEntry(btn.dataset.book));
-  });
-
-  timeline.querySelectorAll(".delete-btn").forEach(btn => {
-    btn.addEventListener("click", () => deleteJournalEntry(btn.dataset.entry));
-  });
-
-  timeline.querySelectorAll(".journal-entry").forEach(entry => {
-    entry.addEventListener("click", e => {
-      if (e.target.closest("button")) return;
-      const bookId = entry.querySelector(".edit-btn")?.dataset.book;
-      if (bookId) openJournalEntry(bookId);
-    });
-  });
+  const list = getFilteredBooks();
+  if(!list.length){
+    grid.innerHTML = '<div class="empty-state">Aucun livre pour le moment…</div>';
+    return;
+  }
+  list.forEach(b => grid.appendChild(renderCard(b)));
 }
 
- /* ═══════════════════════════════════════════════════════════════════
-   INITIALISATION & ÉVÉNEMENTS
-   ═══════════════════════════════════════════════════════════════════ */
-function initApp() {
-  // --- Onglets ---
-  const tabBtns = document.querySelectorAll(".tab-btn");
-  const libraryEl = document.getElementById("library");
-  const journalEl = document.getElementById("journalView");
-  const controlsEl = document.querySelector(".controls");
+/* =========================================================
+   MODALES
+   ========================================================= */
+function openDetail(id){
+  const book = books.find(b => b.id === id);
+  if(!book) return;
+  editingId = id;
+  document.getElementById('detailTitle').textContent = book.title || 'Sans titre';
+  document.getElementById('detailBody').innerHTML = `
+    <p><strong>Auteur :</strong> ${book.author||'—'}</p>
+    <p><strong>Année :</strong> ${book.year||'—'}</p>
+    <p><strong>Genre :</strong> ${book.genre||'—'}</p>
+    <p><strong>Note :</strong> ${book.rating ? '★'.repeat(book.rating) : '—'}</p>
+    <p><strong>Statut :</strong> ${book.read ? 'Lu' : 'À lire'}</p>
+    <p><strong>Favori :</strong> ${book.favorite ? 'Oui' : 'Non'}</p>
+    <p style="margin-top:12px;"><strong>Notes :</strong><br>${(book.notes||'—').replace(/\n/g,'<br>')}</p>`;
+  document.getElementById('detailModal').classList.add('active');
+}
 
-  tabBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      tabBtns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      const tab = btn.dataset.tab;
-
-      const showLibrary = tab === "library";
-      libraryEl.classList.toggle("active", showLibrary);
-      journalEl.classList.toggle("active", !showLibrary);
-
-      // Masquer les contrôles (filtres/tri) sur l'onglet journal
-      if (controlsEl) controlsEl.style.display = showLibrary ? "flex" : "none";
-
-      if (!showLibrary) renderJournal();
-    });
-  });
-
-  // --- Filtres catégorie ---
-  document.querySelectorAll("#categoryFilters .filter-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("#categoryFilters .filter-btn")
-        .forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      currentFilter = btn.dataset.cat;
-      applyFiltersAndRender();
-    });
-  });
-
-  // --- Tri ---
-  const sortSelect = document.getElementById("sortSelect");
-  if (sortSelect) {
-    sortSelect.addEventListener("change", e => {
-      currentSort = e.target.value;
-      applyFiltersAndRender();
-    });
+function openForm(book=null){
+  editingId = book ? book.id : null;
+  document.getElementById('formTitle').textContent = book ? 'Modifier le livre' : 'Ajouter un livre';
+  const f = document.getElementById('bookForm');
+  f.reset();
+  if(book){
+    ['title','author','year','genre','rating','cover','notes'].forEach(k => { if(f[k]) f[k].value = book[k] ?? ''; });
+    if(f.read)     f.read.value     = String(!!book.read);
+    if(f.favorite) f.favorite.value = String(!!book.favorite);
   }
+  document.getElementById('formModal').classList.add('active');
+}
 
-  // --- Recherche ---
-  const searchInput = document.getElementById("searchInput");
-  if (searchInput) {
-    searchInput.addEventListener("input", applyFiltersAndRender);
+document.getElementById('bookForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  const data = {
+    title:    f.title.value.trim(),
+    author:   f.author.value.trim(),
+    year:     f.year.value ? Number(f.year.value) : null,
+    genre:    f.genre.value.trim(),
+    rating:   f.rating.value ? Number(f.rating.value) : 0,
+    cover:    f.cover.value.trim(),
+    notes:    f.notes.value.trim(),
+    read:     f.read.value === 'true',
+    favorite: f.favorite.value === 'true',
+  };
+
+  if(editingId){
+    const i = books.findIndex(b => b.id === editingId);
+    if(i > -1) books[i] = { ...books[i], ...data };
+  } else {
+    books.push({ id: uid(), addedAt: Date.now(), ...data });
   }
+  save(); render();
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+});
 
-  // --- Ajouter un livre ---
-  const btnAdd = document.getElementById("btnAdd");
-  if (btnAdd) btnAdd.addEventListener("click", () => openForm(null));
+/* =========================================================
+   IMPORT / EXPORT
+   ========================================================= */
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(books,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'salon-lecture-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
 
-  // --- Fermer les overlays au clic extérieur ---
-  document.querySelectorAll(".overlay").forEach(overlay => {
-    overlay.addEventListener("click", e => {
-      if (e.target === overlay) overlay.classList.remove("open");
-    });
-  });
-
-  // --- Fermer avec Échap ---
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape") {
-      document.querySelectorAll(".overlay.open").forEach(o => o.classList.remove("open"));
+document.getElementById('importBtn').addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json,application/json';
+  input.onchange = async () => {
+    if(!input.files[0]) return;
+    try {
+      const text = await input.files[0].text();
+      const data = JSON.parse(text);
+      if(!Array.isArray(data)) throw new Error('Format invalide');
+      data.forEach(b => {
+        if(!b.id) b.id = uid();
+        if(!b.addedAt) b.addedAt = Date.now();
+      });
+      books = books.concat(data);
+      save(); render();
+      alert(data.length + ' livre(s) importé(s).');
+    } catch(err){
+      alert('Fichier JSON invalide : ' + err.message);
     }
+  };
+  input.click();
+});
+
+/* =========================================================
+   ÉVÉNEMENTS GLOBAUX
+   ========================================================= */
+document.getElementById('searchInput').addEventListener('input', render);
+
+document.getElementById('filterGroup').addEventListener('click', e => {
+  if(!e.target.matches('.filter-btn')) return;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  currentFilter = e.target.dataset.filter;
+  render();
+});
+
+document.getElementById('sortSelect').addEventListener('change', e => {
+  currentSort = e.target.value;
+  render();
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTab = btn.dataset.tab;
+    render();
   });
+});
 
-  // --- Rendu initial ---
-  applyFiltersAndRender();
-  renderJournal();
+document.querySelectorAll('[data-close]').forEach(b =>
+  b.addEventListener('click', () => b.closest('.modal-overlay').classList.remove('active'))
+);
+document.querySelectorAll('.modal-overlay').forEach(m =>
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('active'); })
+);
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+});
+
+document.getElementById('addBtn').addEventListener('click', () => openForm());
+document.getElementById('editBtn').addEventListener('click', () => {
+  const book = books.find(b => b.id === editingId);
+  document.getElementById('detailModal').classList.remove('active');
+  openForm(book);
+});
+document.getElementById('deleteBtn').addEventListener('click', () => {
+  if(!editingId) return;
+  if(!confirm('Supprimer ce livre ?')) return;
+  books = books.filter(b => b.id !== editingId);
+  save(); render();
+  document.getElementById('detailModal').classList.remove('active');
+});
+
+/* =========================================================
+   PWA — SERVICE WORKER
+   ========================================================= */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
 }
 
-// Lancer une fois le DOM prêt (le script est en bas, mais ceinture + bretelles)
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initApp);
-} else {
-  initApp();
-}
+/* =========================================================
+   INIT
+   ========================================================= */
+render();
+</script>
+</body>
+</html>
