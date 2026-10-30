@@ -662,7 +662,7 @@ function renderJournal() {
 
   if (!sorted.length) {
     timeline.innerHTML = `
-           <div class="journal-empty">
+      <div class="journal-empty">
         <p>Votre journal est vide.</p>
         <p>Ouvrez un livre de votre bibliothèque et ajoutez une entrée pour consigner vos lectures, vos impressions et vos citations préférées.</p>
       </div>
@@ -728,4 +728,87 @@ function renderJournal() {
       if (bookId) openJournalEntry(bookId);
     });
   });
+}
+
+ /* ═══════════════════════════════════════════════════════════════════
+   INITIALISATION & ÉVÉNEMENTS
+   ═══════════════════════════════════════════════════════════════════ */
+function initApp() {
+  // --- Onglets ---
+  const tabBtns = document.querySelectorAll(".tab-btn");
+  const libraryEl = document.getElementById("library");
+  const journalEl = document.getElementById("journalView");
+  const controlsEl = document.querySelector(".controls");
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.dataset.tab;
+
+      const showLibrary = tab === "library";
+      libraryEl.classList.toggle("active", showLibrary);
+      journalEl.classList.toggle("active", !showLibrary);
+
+      // Masquer les contrôles (filtres/tri) sur l'onglet journal
+      if (controlsEl) controlsEl.style.display = showLibrary ? "flex" : "none";
+
+      if (!showLibrary) renderJournal();
+    });
+  });
+
+  // --- Filtres catégorie ---
+  document.querySelectorAll("#categoryFilters .filter-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#categoryFilters .filter-btn")
+        .forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentFilter = btn.dataset.cat;
+      applyFiltersAndRender();
+    });
+  });
+
+  // --- Tri ---
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) {
+    sortSelect.addEventListener("change", e => {
+      currentSort = e.target.value;
+      applyFiltersAndRender();
+    });
+  }
+
+  // --- Recherche ---
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.addEventListener("input", applyFiltersAndRender);
+  }
+
+  // --- Ajouter un livre ---
+  const btnAdd = document.getElementById("btnAdd");
+  if (btnAdd) btnAdd.addEventListener("click", () => openForm(null));
+
+  // --- Fermer les overlays au clic extérieur ---
+  document.querySelectorAll(".overlay").forEach(overlay => {
+    overlay.addEventListener("click", e => {
+      if (e.target === overlay) overlay.classList.remove("open");
+    });
+  });
+
+  // --- Fermer avec Échap ---
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      document.querySelectorAll(".overlay.open").forEach(o => o.classList.remove("open"));
+    }
+  });
+
+  // --- Rendu initial ---
+  applyFiltersAndRender();
+  renderJournal();
+}
+
+// Lancer une fois le DOM prêt (le script est en bas, mais ceinture + bretelles)
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
 }
