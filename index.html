@@ -391,23 +391,29 @@ body{
     <button class="filter-btn" data-cat="Essai">Essai</button>
     <button class="filter-btn" data-cat="Poésie">Poésie</button>
   </div>
-    /* ═══════════════════════════════════════════════════════════════════
-   LE LIVRE DU JOUR — Tirage au hasard (CORRIGÉ)
+  /* ═══════════════════════════════════════════════════════════════════
+   BOUTON "LIVRE DU JOUR" (Version simplifiée qui ne casse rien)
    ═══════════════════════════════════════════════════════════════════ */
-document.getElementById("btnRandomBook").addEventListener("click", () => {
-  const unreadBooks = books.filter(b => b.status === "À lire" || b.status === "En cours");
+document.getElementById("btnRandomBook").addEventListener("click", function() {
+  // Filtrer les livres qui ne sont pas encore lus
+  var unreadBooks = books.filter(function(b) { 
+    return b.status === "À lire" || b.status === "En cours"; 
+  });
   
+  // Si aucun livre, on prévient
   if (unreadBooks.length === 0) {
-    alert("Votre pile « À lire » est vide ! Ajoutez de nouveaux livres pour utiliser cette fonction.");
+    alert("Votre pile « À lire » est vide ! Ajoutez de nouveaux livres avec le statut « À lire ».");
     return;
   }
-
-  const randomIndex = Math.floor(Math.random() * unreadBooks.length);
-  const randomBook = unreadBooks[randomIndex];
-
-  /* On utilise openDetail() qui existe déjà dans l'application */
+  
+  // Tirer un livre au hasard
+  var randomIndex = Math.floor(Math.random() * unreadBooks.length);
+  var randomBook = unreadBooks[randomIndex];
+  
+  // Ouvrir sa fiche
   openDetail(randomBook.id);
 });
+
 </script>
 <footer style="text-align:center; padding:24px; font-family:'Playfair Display',serif; font-style:italic; font-size:11px; color:rgba(212,175,55,.5); letter-spacing:.1em;">
   Le Salon de lecture — un lieu pour vos livres, rien qu'à vous.
